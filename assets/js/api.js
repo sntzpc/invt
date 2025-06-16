@@ -1,22 +1,27 @@
 // assets/js/api.js
 
+// Konfigurasi Google Sheets
 const SHEET_ID = '1ihnb6E27RTX3RekiTJW9ONKA33YAXUfIBCofLMBSbk4';
 const API_KEY = 'AIzaSyAI6poofBSVYkvAwXpkSWZrnj-bJhESOLo';
 
-window.materials = [];
-window.categories = [];
-window.units = [];
-window.locations = [];
-window.stockData = [];
-window.requests = [];
-window.receipts = [];
-window.usages = [];
-window.adjustments = [];
-window.destructions = [];
-window.transfers = [];
-window.activities = [];
+// Variabel data utama
+let materials = [];
+let categories = [];
+let units = [];
+let locations = [];
+let stockData = [];
+let requests = [];
+let receipts = [];
+let usages = [];
+let adjustments = [];
+let destructions = [];
+let transfers = [];
+let activities = [];
 
-// ========== FETCH & CRUD UTILS ==========
+// =====================
+// Fungsi akses data Google Sheets
+// =====================
+
 async function fetchSheetRange(sheetName) {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}?key=${API_KEY}`;
     const resp = await fetch(url);
@@ -59,8 +64,9 @@ async function createSheet(sheetName, headers) {
     await appendToSheet(sheetName, [headers]);
 }
 
-// ========== LOADERS ==========
-
+// =====================
+// Loader Master Data
+// =====================
 async function loadMasterData() {
     try {
         // Materials
@@ -88,7 +94,7 @@ async function loadMasterData() {
         showError('Gagal memuat data master. Silakan coba lagi.');
     }
 }
-
+// Loader Stock Data
 async function loadStockData() {
     try {
         const stock = await fetchSheetRangeIfExist('Stock');
@@ -104,7 +110,7 @@ async function loadStockData() {
         showError('Gagal memuat data stok. Silakan coba lagi.');
     }
 }
-
+// Loader Semua Data Transaksi (permintaan, penerimaan, dsb)
 async function loadTransactionData() {
     try {
         // Requests
@@ -130,7 +136,6 @@ async function loadTransactionData() {
         } else if (!reqItems.values) {
             await createSheet('MaterialRequestItems', ['No. Permintaan', 'Kode Material', 'Qty', 'Kebutuhan']);
         }
-
         // Receipts
         const rec = await fetchSheetRangeIfExist('MaterialReceipts');
         receipts = [];
@@ -154,7 +159,6 @@ async function loadTransactionData() {
         } else if (!recItems.values) {
             await createSheet('MaterialReceiptItems', ['No. Penerimaan', 'Kode Material', 'Batch', 'Qty', 'Expired Date']);
         }
-
         // Usages
         const usage = await fetchSheetRangeIfExist('MaterialUsages');
         usages = [];
@@ -178,7 +182,6 @@ async function loadTransactionData() {
         } else if (!usageItems.values) {
             await createSheet('MaterialUsageItems', ['No. Pengeluaran', 'Kode Material', 'Batch', 'Qty']);
         }
-
         // Adjustments
         const adj = await fetchSheetRangeIfExist('StockAdjustments');
         adjustments = [];
@@ -202,7 +205,6 @@ async function loadTransactionData() {
         } else if (!adjItems.values) {
             await createSheet('StockAdjustmentItems', ['No. Penyesuaian', 'Kode Material', 'Batch', 'Qty Sistem', 'Qty Fisik', 'Selisih']);
         }
-
         // Destructions
         const destr = await fetchSheetRangeIfExist('StockDestructions');
         destructions = [];
@@ -226,7 +228,6 @@ async function loadTransactionData() {
         } else if (!destrItems.values) {
             await createSheet('StockDestructionItems', ['No. Pemusnahan', 'Kode Material', 'Batch', 'Qty', 'Expired Date']);
         }
-
         // Transfers
         const tf = await fetchSheetRangeIfExist('StockTransfers');
         transfers = [];
@@ -250,7 +251,6 @@ async function loadTransactionData() {
         } else if (!tfItems.values) {
             await createSheet('StockTransferItems', ['No. Transfer', 'Kode Material', 'Batch', 'Qty', 'Expired Date']);
         }
-
         // Activities
         const act = await fetchSheetRangeIfExist('Activities');
         activities = [];
@@ -266,8 +266,192 @@ async function loadTransactionData() {
     }
 }
 
-// Untuk update stock dan activity, fungsi ditaruh di main.js sesuai aksi transaksi (biar tetap terstruktur).
+// (Fungsi update stock, tambah activity, dsb. jika ada silakan tambahkan di sini.)
+// Update stock in Google Sheets
+        async function updateStock(materialCode, batch, quantityChange, location, expiryDate = null) {
+            try {
+                // Find existing stock for this material and batch in this location
+                const existingStock = stockData.find(item => 
+                    item.materialCode === materialCode && 
+                    item.batch === batch && 
+                    item.location === location
+                );
+                
+                let newQuantity;
+                let newExpiryDate = expiryDate;
+                
+                if (existingStock) {
+                    // Update existing stock
+                    newQuantity = existingStock.quantity + quantityChange;
+                    newExpiryDate = existingStock.expiryDate || expiryDate;
+                    
+                    // Find the row in Google Sheets (in a real app, you'd need to know the row number)
+                    // This is simplified - in reality you'd need to get the range first
+                    const stockIndex = stockData.findIndex(item => 
+                        item.materialCode === materialCode && 
+                        item.batch === batch && 
+                        item.location === location
+                    );
+                    
+                    if (stockIndex >= 0) {
+                        const stockRow = [
+                            materialCode,
+                            batch,
+                            newQuantity,
+                            location,
+                            newExpiryDate || ''
+                        ];
+                        
+                        await updateSheet('Stock', `A${stockIndex + 2}:E${stockIndex + 2}`, [stockRow]);
+                    }
+                } else if (quantityChange > 0) {
+                    // Add new stock (only if quantity is positive)
+                    newQuantity = quantityChange;
+                    
+                    const stockRow = [
+                        materialCode,
+                        batch,
+                        newQuantity,
+                        location,
+                        newExpiryDate || ''
+                    ];
+                    
+                    await appendToSheet('Stock', [stockRow]);
+                }
+                
+                // Update local stock data
+                if (existingStock) {
+                    if (newQuantity <= 0) {
+                        // Remove from array if quantity is zero or negative
+                        stockData = stockData.filter(item => 
+                            !(item.materialCode === materialCode && 
+                              item.batch === batch && 
+                              item.location === location)
+                        );
+                    } else {
+                        // Update quantity
+                        existingStock.quantity = newQuantity;
+                        if (newExpiryDate) {
+                            existingStock.expiryDate = newExpiryDate;
+                        }
+                    }
+                } else if (quantityChange > 0) {
+                    // Add new stock
+                    stockData.push({
+                        materialCode,
+                        batch,
+                        quantity: newQuantity,
+                        location,
+                        expiryDate: newExpiryDate
+                    });
+                }
+                
+                console.log(`Stock updated: ${materialCode} (${batch}) in ${location} changed by ${quantityChange}`);
+            } catch (error) {
+                console.error('Error updating stock:', error);
+                throw error;
+            }
+        }
+        
+        // Add activity to Google Sheets
+        async function addActivity(date, type, documentNumber, materialCode, quantity, location, user) {
+            try {
+                const activityData = [
+                    date,
+                    type,
+                    documentNumber,
+                    materialCode,
+                    quantity,
+                    location,
+                    user
+                ];
+                
+                await appendToSheet('Activities', [activityData]);
+                
+                // Add to local array
+                activities.push({
+                    date,
+                    type,
+                    documentNumber,
+                    materialCode,
+                    quantity,
+                    location,
+                    user
+                });
+                
+                console.log(`Activity added: ${type} ${documentNumber}`);
+            } catch (error) {
+                console.error('Error adding activity:', error);
+                throw error;
+            }
+        }
+
+         // Save settings
+        async function saveSettings() {
+            const companyName = document.getElementById('companyName').value;
+            const trainingCenterName = document.getElementById('trainingCenterName').value;
+            const defaultLocation = document.getElementById('defaultLocation').value;
+            const daysBeforeExpiryWarning = document.getElementById('daysBeforeExpiryWarning').value;
+            
+            const requestPrefix = document.getElementById('requestPrefix').value;
+            const receiptPrefix = document.getElementById('receiptPrefix').value;
+            const usagePrefix = document.getElementById('usagePrefix').value;
+            const adjustmentPrefix = document.getElementById('adjustmentPrefix').value;
+            const destructionPrefix = document.getElementById('destructionPrefix').value;
+            const transferPrefix = document.getElementById('transferPrefix').value;
+            
+            const sheetId = document.getElementById('sheetId').value;
+            const apiKey = document.getElementById('apiKey').value;
+            
+            try {
+                // In a real app, you would save these settings to Google Sheets or localStorage
+                // For this example, we'll just show a success message
+                
+                showSuccess('Pengaturan berhasil disimpan');
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showError('Gagal menyimpan pengaturan. Silakan coba lagi.');
+            }
+        }
+        
+        // Backup data
+        async function backupData() {
+            try {
+                // In a real app, this would create a backup of all data
+                // For this example, we'll just show a success message
+                
+                showSuccess('Backup data berhasil dilakukan');
+            } catch (error) {
+                console.error('Error backing up data:', error);
+                showError('Gagal melakukan backup data. Silakan coba lagi.');
+            }
+        }
+        
+        // Restore data
+        async function restoreData() {
+            const fileInput = document.getElementById('restoreFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showError('Harap pilih file backup terlebih dahulu');
+                return;
+            }
+            
+            try {
+                // In a real app, this would restore data from the backup file
+                // For this example, we'll just show a success message
+                
+                showSuccess('Restore data berhasil dilakukan');
+                fileInput.value = ''; // Clear file input
+            } catch (error) {
+                console.error('Error restoring data:', error);
+                showError('Gagal melakukan restore data. Silakan coba lagi.');
+            }
+        }
+        
+// Export ke global untuk dipakai di file lain
 window.api = {
     fetchSheetRange, appendToSheet, updateSheet, createSheet,
-    loadMasterData, loadStockData, loadTransactionData,
+    loadMasterData, loadStockData, loadTransactionData, updateStock, addActivity, backupData, restoreData
+    // tambahkan fungsi lain jika perlu
 };

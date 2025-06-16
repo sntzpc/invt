@@ -1,7 +1,7 @@
 // assets/js/ui.js
 
 // ========== DASHBOARD & SUMMARY ==========
-function renderDashboard() {
+function updateDashboard() {
     document.getElementById('totalMaterials').textContent = materials.length;
     let totalStock = stockData.reduce((sum, x) => sum + x.quantity, 0);
     document.getElementById('totalStock').textContent = totalStock;
@@ -18,12 +18,12 @@ function renderDashboard() {
     document.getElementById('expiredStock').textContent = expiredStock;
     document.getElementById('expiringStock').textContent = expiringStock;
 
-    renderLowStockTable();
-    renderExpiringTable();
-    renderActivityTable();
+    updateLowStockTable();
+    updateExpiringTable();
+    updateActivityTable();
 }
 
-function renderLowStockTable() {
+function updateLowStockTable() {
     let tbody = document.getElementById('lowStockTable');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -41,7 +41,7 @@ function renderLowStockTable() {
     });
 }
 
-function renderExpiringTable() {
+function updateExpiringTable() {
     let tbody = document.getElementById('expiringTable');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -65,7 +65,7 @@ function renderExpiringTable() {
     });
 }
 
-function renderActivityTable() {
+function updateActivityTable() {
     let tbody = document.getElementById('activityTable');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -83,8 +83,9 @@ function renderActivityTable() {
     });
 }
 
-// ========== MASTER DATA TABLE & DROPDOWN ==========
-function renderMaterialsTable() {
+// ========== RENDER TABEL MASTER, REQUEST, RECEIPT, USAGE, DLL ==========
+
+function populateMaterialsTable() {
     let tbody = document.querySelector('#masterDataTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -109,8 +110,7 @@ function renderMaterialsTable() {
         tbody.appendChild(tr);
     });
 }
-
-function renderMaterialDropdowns() {
+function populateMaterialDropdowns() {
     let dropdowns = [
         document.getElementById('forecastMaterial'),
         document.getElementById('reportMaterial')
@@ -128,8 +128,9 @@ function renderMaterialDropdowns() {
     });
 }
 
-// ========== MATERIAL REQUESTS ==========
-function renderMaterialRequestTable() {
+// ========== TABEL REQUEST, RECEIPT, USAGE, DLL ==========
+
+function populateMaterialRequestTable() {
     let tbody = document.querySelector('#materialRequestTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -139,7 +140,7 @@ function renderMaterialRequestTable() {
             <td>${req.number}</td>
             <td>${req.date}</td>
             <td>${req.training}</td>
-            <td><span class="badge bg-${getStatusBadgeClass(req.status)}">${req.status}</span></td>
+            <td><span class="badge bg-${utils.getStatusBadgeClass(req.status)}">${req.status}</span></td>
             <td>${req.createdBy}</td>
             <td>
                 <button class="btn btn-sm btn-info view-request" data-number="${req.number}">
@@ -158,9 +159,7 @@ function renderMaterialRequestTable() {
         tbody.appendChild(tr);
     });
 }
-
-// ========== RECEIPTS ==========
-function renderReceiptsTable() {
+function populateMaterialReceiptTable() {
     let tbody = document.querySelector('#receiptsTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -188,9 +187,7 @@ function renderReceiptsTable() {
         tbody.appendChild(tr);
     });
 }
-
-// ========== USAGES ==========
-function renderUsagesTable() {
+function populateMaterialUsageTable() {
     let tbody = document.querySelector('#usagesTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -217,9 +214,7 @@ function renderUsagesTable() {
         tbody.appendChild(tr);
     });
 }
-
-// ========== ADJUSTMENTS ==========
-function renderAdjustmentsTable() {
+function populateStockAdjustmentTable() {
     let tbody = document.querySelector('#adjustmentsTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -246,9 +241,7 @@ function renderAdjustmentsTable() {
         tbody.appendChild(tr);
     });
 }
-
-// ========== DESTRUCTIONS ==========
-function renderDestructionsTable() {
+function populateStockDestructionTable() {
     let tbody = document.querySelector('#destructionsTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -276,9 +269,7 @@ function renderDestructionsTable() {
         tbody.appendChild(tr);
     });
 }
-
-// ========== TRANSFERS ==========
-function renderTransfersTable() {
+function populateStockTransferTable() {
     let tbody = document.querySelector('#transfersTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -306,7 +297,7 @@ function renderTransfersTable() {
     });
 }
 
-// ========== MODAL DETAIL DOKUMEN ==========
+// ========== MODAL DETAIL ==========
 function showDetailModal(html, title = "Detail Dokumen") {
     let modalContainer = document.getElementById("modals");
     if (!modalContainer) return;
@@ -329,32 +320,116 @@ function showDetailModal(html, title = "Detail Dokumen") {
     modal.show();
 }
 
-// ========== STATUS BADGE ==========
-function getStatusBadgeClass(status) {
-    switch (status) {
-        case 'Draft': return 'secondary';
-        case 'Disetujui': return 'success';
-        case 'Ditolak': return 'danger';
-        case 'Diproses': return 'warning';
-        case 'Selesai': return 'primary';
-        default: return 'secondary';
-    }
-}
+// Update forecast chart
+        function updateForecastChart(historicalData, forecastValue) {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.forecastChart) {
+                window.forecastChart.destroy();
+            }
+            
+            // Prepare data
+            const labels = historicalData.map(item => item.month);
+            const data = historicalData.map(item => item.usage);
+            
+            // Add forecast to the end
+            labels.push('Forecast');
+            data.push(forecastValue);
+            
+            // Create new chart
+            window.forecastChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pemakaian per Bulan',
+                        data: data,
+                        backgroundColor: [
+                            ...Array(historicalData.length).fill('rgba(54, 162, 235, 0.7)'),
+                            'rgba(255, 99, 132, 0.7)'
+                        ],
+                        borderColor: [
+                            ...Array(historicalData.length).fill('rgba(54, 162, 235, 1)'),
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Quantity'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update recommendation table
+        function updateRecommendationTable(material, forecastValue, period) {
+            const tableBody = document.querySelector('#forecastRecommendationTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Calculate current stock
+            const currentStock = stockData
+                .filter(item => item.materialCode === material.code)
+                .reduce((sum, item) => sum + item.quantity, 0);
+            
+            // Calculate projected need
+            const projectedNeed = forecastValue * period;
+            
+            // Calculate recommended purchase
+            const minStock = material.minStock || 0;
+            let recommendedPurchase = projectedNeed - currentStock;
+            if (recommendedPurchase < 0) recommendedPurchase = 0;
+            
+            // Add buffer (20%)
+            recommendedPurchase = Math.ceil(recommendedPurchase * 1.2);
+            
+            // Add row to table
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${material.name} (${material.code})</td>
+                <td>${currentStock} ${material.unit}</td>
+                <td>${forecastValue.toFixed(1)} ${material.unit}/bulan</td>
+                <td>${projectedNeed} ${material.unit}</td>
+                <td>${minStock} ${material.unit}</td>
+                <td class="fw-bold">${recommendedPurchase} ${material.unit}</td>
+                <td>7-14</td>
+            `;
+            tableBody.appendChild(row);
+        }
+
+        // Print detail
+        function printDetail() {
+            // In a real app, this would print the current detail view
+            showInfo('Fitur print akan diimplementasikan');
+        }
+        
+
 
 // ========== EXPORT KE GLOBAL ==========
 window.ui = {
-    renderDashboard,
-    renderLowStockTable,
-    renderExpiringTable,
-    renderActivityTable,
-    renderMaterialsTable,
-    renderMaterialDropdowns,
-    renderMaterialRequestTable,
-    renderReceiptsTable,
-    renderUsagesTable,
-    renderAdjustmentsTable,
-    renderDestructionsTable,
-    renderTransfersTable,
+    updateDashboard,
+    updateLowStockTable,
+    updateExpiringTable,
+    updateActivityTable,
+    populateMaterialsTable,
+    populateMaterialDropdowns,
+    populateMaterialRequestTable,
+    populateMaterialReceiptTable,
+    populateMaterialUsageTable,
+    populateStockAdjustmentTable,
+    populateStockDestructionTable,
+    populateStockTransferTable,
     showDetailModal,
-    getStatusBadgeClass,
+    updateForecastChart,
+    updateRecommendationTable,
+    printDetail
 };
