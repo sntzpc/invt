@@ -1,5 +1,5 @@
 // js/api.js
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzWdYPkK47bQLi2MvpMUOAoFNCjldYJRjw3oOSm0VrIXqB0DpjjMQrlqexjfP4drQUA/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwp7rkFVgcTPzkpDPGTJZBoS5JD1C_ZrCws1EwxFZhUpEU91BNw2Z7yRPu1DBtmtuc7/exec';
 
 export async function getMaterials() {
     const res = await fetch(`${GAS_URL}?sheet=Materials`);
