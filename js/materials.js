@@ -1,5 +1,4 @@
 // js/materials.js
-import { getMaterials, addMaterial, editMaterial, deleteMaterial } from './api.js';
 
 let materials = [];
 
