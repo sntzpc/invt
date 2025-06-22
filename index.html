@@ -63,74 +63,97 @@
         <div class="main-content w-100">
             <div class="tab-content">
                 <!-- Master Data Material -->
-                <div class="tab-pane fade show active" id="tab-master">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3>Master Data Material</h3>
-                        <button class="btn btn-success" id="btnAddMaterial">Tambah Material</button>
-                    </div>
-                    <div class="card">
-                        <div class="card-body p-0">
-                            <table class="table table-striped mb-0" id="materialsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Kode</th>
-                                        <th>Nama</th>
-                                        <th>Kategori</th>
-                                        <th>Satuan</th>
-                                        <th>Min. Stok</th>
-                                        <th>Kadaluarsa?</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <!-- Kategori -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-secondary text-white">Kategori Material</div>
-                        <div class="card-body">
-                            <form class="mb-3" id="formCategory">
-                                <input type="hidden" id="categoryId">
-                                <div class="input-group">
-                                    <input type="text" id="categoryName" class="form-control"
-                                        placeholder="Nama Kategori" required>
-                                    <button class="btn btn-success" type="submit" id="btnSaveCategory">Simpan</button>
-                                </div>
-                            </form>
-                            <ul class="list-group" id="categoryList"></ul>
-                        </div>
-                    </div>
-                    <!-- Satuan -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-secondary text-white">Satuan Material</div>
-                        <div class="card-body">
-                            <form class="mb-3" id="formUnit">
-                                <input type="hidden" id="unitId">
-                                <div class="input-group">
-                                    <input type="text" id="unitName" class="form-control" placeholder="Satuan" required>
-                                    <button class="btn btn-success" type="submit" id="btnSaveCategory">Simpan</button>
-                                </div>
-                            </form>
-                            <ul class="list-group" id="unitList"></ul>
-                        </div>
-                    </div>
-                    <!-- Lokasi -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-secondary text-white">Lokasi Material</div>
-                        <div class="card-body">
-                            <form class="mb-3" id="formLocation">
-                                <input type="hidden" id="locationId">
-                                <div class="input-group">
-                                    <input type="text" id="locationName" class="form-control" placeholder="Lokasi"
-                                        required>
-                                    <button class="btn btn-success" type="submit" id="btnSaveCategory">Simpan</button>
-                                </div>
-                            </form>
-                            <ul class="list-group" id="locationList"></ul>
-                        </div>
-                    </div>
+                
+    <ul class="nav nav-tabs mb-3" id="subtab-masterdata" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="subtab-material-tab" data-bs-toggle="tab" data-bs-target="#subtab-material" type="button" role="tab">Material</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="subtab-category-tab" data-bs-toggle="tab" data-bs-target="#subtab-category" type="button" role="tab">Kategori</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="subtab-unit-tab" data-bs-toggle="tab" data-bs-target="#subtab-unit" type="button" role="tab">Satuan</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="subtab-location-tab" data-bs-toggle="tab" data-bs-target="#subtab-location" type="button" role="tab">Lokasi</button>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <!-- Sub-tab Material -->
+        <div class="tab-pane fade show active" id="subtab-material" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Master Data Material</h3>
+                <button class="btn btn-success" id="btnAddMaterial">Tambah Material</button>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0" id="materialsTable">
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>Nama</th>
+                                <th>Kategori</th>
+                                <th>Satuan</th>
+                                <th>Min. Stok</th>
+                                <th>Kadaluarsa?</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
+            </div>
+        </div>
+        <!-- Sub-tab Kategori -->
+        <div class="tab-pane fade" id="subtab-category" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">Kategori Material</div>
+                <div class="card-body">
+                    <form class="mb-3" id="formCategory">
+                        <input type="hidden" id="categoryId">
+                        <div class="input-group">
+                            <input type="text" id="categoryName" class="form-control" placeholder="Nama Kategori" required>
+                            <button class="btn btn-success" type="submit" id="btnSaveCategory">Simpan</button>
+                        </div>
+                    </form>
+                    <ul class="list-group" id="categoryList"></ul>
+                </div>
+            </div>
+        </div>
+        <!-- Sub-tab Satuan -->
+        <div class="tab-pane fade" id="subtab-unit" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">Satuan Material</div>
+                <div class="card-body">
+                    <form class="mb-3" id="formUnit">
+                        <input type="hidden" id="unitId">
+                        <div class="input-group">
+                            <input type="text" id="unitName" class="form-control" placeholder="Satuan" required>
+                            <button class="btn btn-success" type="submit" id="btnSaveUnit">Simpan</button>
+                        </div>
+                    </form>
+                    <ul class="list-group" id="unitList"></ul>
+                </div>
+            </div>
+        </div>
+        <!-- Sub-tab Lokasi -->
+        <div class="tab-pane fade" id="subtab-location" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">Lokasi Material</div>
+                <div class="card-body">
+                    <form class="mb-3" id="formLocation">
+                        <input type="hidden" id="locationId">
+                        <div class="input-group">
+                            <input type="text" id="locationName" class="form-control" placeholder="Lokasi" required>
+                            <button class="btn btn-success" type="submit" id="btnSaveLocation">Simpan</button>
+                        </div>
+                    </form>
+                    <ul class="list-group" id="locationList"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                 <!-- Permintaan Material -->
                 <div class="tab-pane fade" id="tab-request">
                     <div class="d-flex justify-content-between align-items-center mb-3">
