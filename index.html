@@ -2,42 +2,197 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Inventory Training Center</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <style>
+        body { background: #f5f5f5; }
+        .sidebar { min-width: 220px; background: #276839; color: #fff; min-height: 100vh; }
+        .sidebar .nav-link { color: #fff; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover { background: #184624; }
+        .main-content { margin-left: 220px; padding: 2rem; }
+        @media (max-width: 768px) {
+            .sidebar { min-width: 60px; }
+            .sidebar .nav-link span { display: none; }
+            .main-content { margin-left: 60px; }
+        }
+    </style>
 </head>
 <body>
-    <div id="auth-area" class="d-flex flex-column align-items-center justify-content-center" style="height:100vh">
-        <!-- Google Sign-In will render here -->
+    <div class="d-flex">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar d-flex flex-column p-3 position-fixed h-100">
+            <h4 class="mb-4 text-center">Inventory TC</h4>
+            <ul class="nav nav-pills flex-column gap-1">
+                <li><a class="nav-link active" data-bs-toggle="tab" href="#tab-master">Master Data</a></li>
+                <li><a class="nav-link" data-bs-toggle="tab" href="#tab-request">Permintaan Material</a></li>
+                <!-- Tab lainnya (Permintaan, Penerimaan, dll) akan menyusul -->
+            </ul>
+        </div>
+        <!-- Main Content -->
+        <div class="main-content w-100">
+            <div class="tab-content">
+                <!-- Master Data Material -->
+                <div class="tab-pane fade show active" id="tab-master">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>Master Data Material</h3>
+                        <button class="btn btn-success" id="btnAddMaterial">Tambah Material</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <table class="table table-striped mb-0" id="materialsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Kode</th><th>Nama</th><th>Kategori</th>
+                                        <th>Satuan</th><th>Min. Stok</th><th>Kadaluarsa?</th><th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Permintaan Material -->
+<div class="tab-pane fade" id="tab-request">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Permintaan Material</h3>
+        <button class="btn btn-success" id="btnAddRequest">Buat Permintaan</button>
     </div>
-    <div id="app" style="display:none">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
-            <div class="container-fluid">
-                <span class="navbar-brand">Inventory TC</span>
-                <div class="ms-auto">
-                    <span id="user-name" class="me-3"></span>
-                    <button class="btn btn-outline-danger btn-sm" onclick="logout()">Logout</button>
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0" id="requestTable">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>Pelatihan</th>
+                        <th>Status</th>
+                        <th>Jumlah Item</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                <!-- Tab lainnya menyusul -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Material -->
+    <div class="modal fade" id="materialModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="materialForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="materialModalLabel">Tambah Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="materialIdx" value="" />
+                    <div class="mb-2">
+                        <label class="form-label">Kode Material</label>
+                        <input type="text" class="form-control" id="materialCode" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Nama Material</label>
+                        <input type="text" class="form-control" id="materialName" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Kategori</label>
+                        <select class="form-select" id="materialCategory" required>
+                            <option value="">Pilih...</option>
+                            <option value="Bahan Makanan">Bahan Makanan</option>
+                            <option value="Pembersih">Pembersih</option>
+                            <option value="ATK">ATK</option>
+                            <option value="Peralatan">Peralatan</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Satuan</label>
+                        <select class="form-select" id="materialUnit" required>
+                            <option value="">Pilih...</option>
+                            <option value="Pcs">Pcs</option>
+                            <option value="Kg">Kg</option>
+                            <option value="Liter">Liter</option>
+                            <option value="Pack">Pack</option>
+                            <option value="Dus">Dus</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Min. Stok</label>
+                        <input type="number" class="form-control" id="materialMinStock" min="0" value="0" required />
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="materialIsExpirable">
+                        <label class="form-check-label">Material Memiliki Kadaluarsa</label>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Catatan</label>
+                        <textarea class="form-control" id="materialNotes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
+                    <button class="btn btn-primary" type="submit">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Modal Permintaan Material -->
+<div class="modal fade" id="requestModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form class="modal-content" id="requestForm">
+            <div class="modal-header">
+                <h5 class="modal-title">Buat Permintaan Material</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="requestIdx" value="" />
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label">Tanggal Permintaan</label>
+                        <input type="date" class="form-control" id="requestDate" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Pelatihan</label>
+                        <input type="text" class="form-control" id="requestTraining" required>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Catatan</label>
+                    <textarea class="form-control" id="requestNotes" rows="2"></textarea>
+                </div>
+                <hr>
+                <h6>Daftar Item Material</h6>
+                <button class="btn btn-outline-primary mb-2" type="button" id="btnAddRequestItem">Tambah Item</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="requestItemsTable">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Qty</th>
+                                <th>Satuan</th>
+                                <th>Kebutuhan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
-        </nav>
-        <!-- Konten utama aplikasi (dashboard/tabel/modal) Anda akan dirender di sini -->
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
+                <button class="btn btn-primary" type="submit">Simpan Permintaan</button>
+            </div>
+        </form>
     </div>
-
-    <div id="modals"></div>
-    <div id="login-error" class="text-danger" style="display:none"></div>
-
-    <!-- JS LIBS -->
+</div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- APP SCRIPTS (urutan penting!) -->
-    <script src="assets/js/auth.js"></script>
-    <script src="assets/js/utils.js"></script>
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/ui.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script type="module" src="js/materials.js"></script>
+<script type="module" src="js/api.js"></script>
 </body>
 </html>
