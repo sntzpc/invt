@@ -2,56 +2,97 @@
 
 let requests = [];
 
-// Render tabel permintaan
+async function loadRequests() {
+    requests = await getRequests();
+    renderRequestTable();
+}
+
 function renderRequestTable() {
     const tbody = document.querySelector('#requestTable tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
     requests.forEach((r, idx) => {
+        const itemArr = Array.isArray(r.items) ? r.items : JSON.parse(r.items || '[]');
         tbody.innerHTML += `
             <tr>
-                <td>${r.no}</td>
-                <td>${r.tanggal}</td>
-                <td>${r.pelatihan}</td>
-                <td>${r.status}</td>
-                <td>${r.items.length}</td>
+                <td>${idx + 1}</td>
+                <td>${r.tanggal || '-'}</td>
+                <td>${r.pelatihan || '-'}</td>
+                <td>${r.status || '-'}</td>
+                <td>${itemArr.length}</td>
                 <td>
                     <button class="btn btn-info btn-sm" onclick="viewRequest(${idx})">Lihat</button>
                     <button class="btn btn-warning btn-sm" onclick="editRequest(${idx})">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteRequest(${idx})">Hapus</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRequestAct('${r.id}')">Hapus</button>
                 </td>
             </tr>
         `;
     });
 }
 
-// Inisialisasi tombol tambah permintaan
-document.getElementById('btnAddRequest').onclick = function() {
-    openRequestModal();
+window.viewRequest = function(idx) {
+    const r = requests[idx];
+    let msg = `<strong>No:</strong> ${r.id}<br>
+        <strong>Tanggal:</strong> ${r.tanggal}<br>
+        <strong>Pelatihan:</strong> ${r.pelatihan}<br>
+        <strong>Status:</strong> ${r.status}<br>
+        <strong>Catatan:</strong> ${r.catatan || '-'}<br>
+        <strong>Item:</strong><ul>`;
+    const items = Array.isArray(r.items) ? r.items : JSON.parse(r.items || '[]');
+    items.forEach(i => {
+        const mat = (window.materials || []).find(m => m.code === i.kode);
+        msg += `<li>${mat ? mat.name : i.kode} - ${i.qty} (${i.kebutuhan || '-'})</li>`;
+    });
+    msg += '</ul>';
+    showAlert(msg.replace(/<[^>]*>?/gm, '\n'), 'info', 5000); // Untuk produksi, bisa ganti jadi modal
 };
 
-// Open Modal Permintaan (baru/edit)
-function openRequestModal(data = null, idx = '') {
-    document.getElementById('requestForm').reset();
-    document.getElementById('requestItemsTable').querySelector('tbody').innerHTML = '';
-    document.getElementById('requestIdx').value = idx;
-    if (data) {
-        document.getElementById('requestDate').value = data.tanggal;
-        document.getElementById('requestTraining').value = data.pelatihan;
-        document.getElementById('requestNotes').value = data.catatan;
-        data.items.forEach(addRequestItemRow);
-    } else {
-        document.getElementById('requestDate').value = (new Date()).toISOString().substr(0,10);
+window.editRequest = function(idx) {
+    openRequestModal(requests[idx], idx);
+};
+
+window.deleteRequestAct = async function(id) {
+    if (confirm('Yakin hapus permintaan material ini?')) {
+        await deleteRequest(id);
+        await loadRequests();
     }
-    new bootstrap.Modal(document.getElementById('requestModal')).show();
+};
+
+const btnAddRequest = document.getElementById('btnAddRequest');
+if (btnAddRequest) {
+    btnAddRequest.onclick = function() {
+        openRequestModal();
+    };
 }
 
-// Tambah baris item material
-document.getElementById('btnAddRequestItem').onclick = function() {
-    addRequestItemRow();
-};
+// -------- Modal Form Logic --------
+function openRequestModal(data = null, idx = '') {
+    const reqForm = document.getElementById('requestForm');
+if (reqForm) reqForm.reset();
+    const itemsTable = document.getElementById('requestItemsTable');
+if (itemsTable) itemsTable.querySelector('tbody').innerHTML = '';
+    const idxEl = document.getElementById('requestIdx');
+if (idxEl) idxEl.value = idx || '';
+    if (data) {
+        document.getElementById('requestDate').value = data.tanggal || '';
+        document.getElementById('requestTraining').value = data.pelatihan || '';
+        document.getElementById('requestNotes').value = data.catatan || '';
+        (Array.isArray(data.items) ? data.items : JSON.parse(data.items || '[]')).forEach(addRequestItemRow);
+    } else {
+        document.getElementById('requestDate').value = (new Date()).toISOString().substr(0, 10);
+    }
+    showModal('requestModal');
+}
+
+const btnAddRequestItem = document.getElementById('btnAddRequestItem');
+if (btnAddRequestItem) {
+    btnAddRequestItem.onclick = function() {
+        addRequestItemRow();
+    };
+}
+
 function addRequestItemRow(item = null) {
-    // Ambil list material dari window.materials (pastikan window.materials sudah available)
-    const materialsList = (window.materials || []);
+    const materialsList = window.materials || [];
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td>
@@ -65,14 +106,11 @@ function addRequestItemRow(item = null) {
         <td><input type="text" class="form-control req-purpose" value="${item ? item.kebutuhan || '' : ''}"></td>
         <td><button class="btn btn-danger btn-sm req-remove-item" type="button">&times;</button></td>
     `;
-    tr.querySelector('.req-remove-item').onclick = function() {
-        tr.remove();
-    };
-    tr.querySelector('.req-material-select').onchange = function() {
+    tr.querySelector('.req-remove-item').onclick = function () { tr.remove(); };
+    tr.querySelector('.req-material-select').onchange = function () {
         const mat = materialsList.find(m => m.code === this.value);
         tr.querySelector('.req-unit').textContent = mat ? mat.unit : '-';
     };
-    // Jika item sudah ada, set material & unit
     if (item && item.kode) {
         tr.querySelector('.req-material-select').value = item.kode;
         const mat = materialsList.find(m => m.code === item.kode);
@@ -81,81 +119,56 @@ function addRequestItemRow(item = null) {
     document.querySelector('#requestItemsTable tbody').appendChild(tr);
 }
 
-// Submit permintaan material
-document.getElementById('requestForm').onsubmit = function(e) {
-    e.preventDefault();
-    const idx = document.getElementById('requestIdx').value;
-    const tanggal = document.getElementById('requestDate').value;
-    const pelatihan = document.getElementById('requestTraining').value.trim();
-    const catatan = document.getElementById('requestNotes').value.trim();
-    const itemRows = document.querySelectorAll('#requestItemsTable tbody tr');
-    if (!tanggal || !pelatihan || itemRows.length === 0) {
-        alert('Isi semua field dan minimal satu item material.');
-        return;
+// -------- SUBMIT FORM --------
+const requestForm = document.getElementById('requestForm');
+if (requestForm) {
+    requestForm.onsubmit = async function (e) {
+        e.preventDefault();
+        const idxEl = document.getElementById('requestIdx');
+        const dateEl = document.getElementById('requestDate');
+        const trainingEl = document.getElementById('requestTraining');
+        const notesEl = document.getElementById('requestNotes');
+        const idx = idxEl ? idxEl.value : '';
+        const tanggal = dateEl ? dateEl.value : '';
+        const pelatihan = trainingEl ? trainingEl.value.trim() : '';
+        const catatan = notesEl ? notesEl.value.trim() : '';
+        const itemRows = document.querySelectorAll('#requestItemsTable tbody tr');
+        if (!tanggal || !pelatihan || itemRows.length === 0) {
+            showAlert('Isi semua field dan minimal satu item material.', 'danger');
+            return;
+        }
+        const items = [];
+        let valid = true;
+        itemRows.forEach(tr => {
+            const kode = tr.querySelector('.req-material-select').value;
+            const qty = Number(tr.querySelector('.req-qty').value);
+            const kebutuhan = tr.querySelector('.req-purpose').value.trim();
+            if (!kode || qty <= 0) valid = false;
+            items.push({ kode, qty, kebutuhan });
+        });
+        if (!valid) {
+            showAlert('Semua item material harus dipilih dan qty > 0!', 'danger');
+            return;
+        }
+        const status = "Draft";
+        const data = {
+            tanggal, pelatihan, catatan, status,
+            items: JSON.stringify(items)
+        };
+        if (idx && requests[idx]) {
+            data.id = requests[idx].id;
+            await editRequest(data);
+        } else {
+            await addRequest(data);
+        }
+        hideModal('requestModal');
+        await loadRequests();
     }
-    // Ambil data items
-    const items = [];
-    let valid = true;
-    itemRows.forEach(tr => {
-        const kode = tr.querySelector('.req-material-select').value;
-        const qty = Number(tr.querySelector('.req-qty').value);
-        const kebutuhan = tr.querySelector('.req-purpose').value.trim();
-        if (!kode || qty <= 0) valid = false;
-        items.push({ kode, qty, kebutuhan });
-    });
-    if (!valid) {
-        alert('Semua item material harus dipilih dan qty > 0!');
-        return;
-    }
-    // Nomor otomatis
-    const no = idx === "" ? `REQ${Date.now().toString().substr(-6)}` : requests[idx].no;
-    const status = "Draft";
-    const data = { no, tanggal, pelatihan, catatan, status, items };
-    if (idx === "") {
-        requests.push(data);
-    } else {
-        requests[idx] = data;
-    }
-    renderRequestTable();
-    bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
-};
+}
 
-// View permintaan material (popup alert sederhana)
-window.viewRequest = function(idx) {
-    const r = requests[idx];
-    let msg = `<strong>No:</strong> ${r.no}<br>
-        <strong>Tanggal:</strong> ${r.tanggal}<br>
-        <strong>Pelatihan:</strong> ${r.pelatihan}<br>
-        <strong>Status:</strong> ${r.status}<br>
-        <strong>Catatan:</strong> ${r.catatan || '-'}<br>
-        <strong>Item:</strong><ul>`;
-    r.items.forEach(i => {
-        const mat = (window.materials || []).find(m => m.code === i.kode);
-        msg += `<li>${mat ? mat.name : i.kode} - ${i.qty}</li>`;
-    });
-    msg += '</ul>';
-    // Ganti dengan modal atau SweetAlert jika ingin lebih bagus
-    alert(msg.replace(/<[^>]*>?/gm, '')); // Untuk demo pakai alert, ganti dengan modal untuk produksi
-};
 
-// Edit
-window.editRequest = function(idx) {
-    openRequestModal(requests[idx], idx);
-};
-
-// Hapus
-window.deleteRequest = function(idx) {
-    if (confirm('Yakin hapus permintaan material ini?')) {
-        requests.splice(idx, 1);
-        renderRequestTable();
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('requestTable')) {
+        loadRequests();
     }
-};
-
-// Dummy data awal (opsional)
-requests = [
-    {
-        no:'REQ202401', tanggal:'2024-06-22', pelatihan:'Basic Safety', catatan:'Segera', status:'Draft',
-        items: [{kode:'BHN001', qty:10, kebutuhan:'Catering'}, {kode:'PMB001', qty:2, kebutuhan:'Toilet'}]
-    }
-];
-renderRequestTable();
+});

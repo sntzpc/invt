@@ -1,263 +1,1444 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Inventory Training Center</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Training Center - Perkebunan Kelapa Sawit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
     <div class="d-flex">
-        <!-- Sidebar Navigation -->
-        <div class="sidebar d-flex flex-column p-3 position-fixed h-100">
-            <h4 class="mb-4 text-center">Inventory TC</h4>
-            <ul class="nav nav-pills flex-column gap-1">
-                <li><a class="nav-link active" data-bs-toggle="tab" href="#tab-master">Master Data</a></li>
-                <li><a class="nav-link" data-bs-toggle="tab" href="#tab-request">Permintaan Material</a></li>
-                <!-- Tab lainnya (Permintaan, Penerimaan, dll) akan menyusul -->
+        <!-- Sidebar -->
+        <div class="sidebar p-3" id="sidebar">
+            <div class="text-center mb-4">
+                <img src="https://via.placeholder.com/150x50?text=Training+Center" alt="Logo" class="img-fluid">
+                <h5 class="mt-2 d-none d-md-block">Inventory System</h5>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-bs-toggle="tab" data-bs-target="#dashboard">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#master-data">
+                        <i class="bi bi-database"></i>
+                        <span>Master Data</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#material-request">
+                        <i class="bi bi-clipboard-plus"></i>
+                        <span>Permintaan Material</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#material-receipt">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span>Penerimaan Material</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#material-usage">
+                        <i class="bi bi-clipboard-minus"></i>
+                        <span>Pengeluaran Material</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#stock-adjustment">
+                        <i class="bi bi-clipboard-data"></i>
+                        <span>Penyesuaian Stok</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#stock-destruction">
+                        <i class="bi bi-trash"></i>
+                        <span>Pemusnahan Stok</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#stock-transfer">
+                        <i class="bi bi-arrow-left-right"></i>
+                        <span>Transfer Stok</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#stock-forecast">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Forecast Stok</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#reports">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+                <li class="nav-item mt-3">
+                    <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#settings">
+                        <i class="bi bi-gear"></i>
+                        <span>Pengaturan</span>
+                    </a>
+                </li>
             </ul>
         </div>
+
         <!-- Main Content -->
-        <div class="main-content w-100">
+        <div class="main-content w-100 p-4">
             <div class="tab-content">
-                <!-- Master Data Material -->
+                <!-- Dashboard Tab -->
+                <div class="tab-pane fade show active" id="dashboard">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Dashboard Inventory</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchDashboard">
+                            </div>
+                            <button class="btn btn-primary" id="refreshDashboard">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Total Material</h5>
+                                    <h1 class="display-4" id="totalMaterials">0</h1>
+                                    <p class="card-text">Jenis material tersedia</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Total Stok</h5>
+                                    <h1 class="display-4" id="totalStock">0</h1>
+                                    <p class="card-text">Total item dalam inventory</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Stok Expired</h5>
+                                    <h1 class="display-4 text-danger" id="expiredStock">0</h1>
+                                    <p class="card-text">Item kadaluarsa</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Stok Akan Expired</h5>
+                                    <h1 class="display-4 text-warning" id="expiringStock">0</h1>
+                                    <p class="card-text">Item hampir kadaluarsa</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Stok Rendah</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Material</th>
+                                                    <th>Stok</th>
+                                                    <th>Min. Stok</th>
+                                                    <th>Lokasi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="lowStockTable">
+                                                <!-- Data will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Akan Expired</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Material</th>
+                                                    <th>Batch</th>
+                                                    <th>Expired Date</th>
+                                                    <th>Sisa Hari</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="expiringTable">
+                                                <!-- Data will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Aktivitas Terakhir</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tanggal</th>
+                                                    <th>Tipe</th>
+                                                    <th>Material</th>
+                                                    <th>Qty</th>
+                                                    <th>Lokasi</th>
+                                                    <th>User</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="activityTable">
+                                                <!-- Data will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
-    <ul class="nav nav-tabs mb-3" id="subtab-masterdata" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="subtab-material-tab" data-bs-toggle="tab" data-bs-target="#subtab-material" type="button" role="tab">Material</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="subtab-category-tab" data-bs-toggle="tab" data-bs-target="#subtab-category" type="button" role="tab">Kategori</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="subtab-unit-tab" data-bs-toggle="tab" data-bs-target="#subtab-unit" type="button" role="tab">Satuan</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="subtab-location-tab" data-bs-toggle="tab" data-bs-target="#subtab-location" type="button" role="tab">Lokasi</button>
-        </li>
-    </ul>
-    <div class="tab-content">
-        <!-- Sub-tab Material -->
-        <div class="tab-pane fade show active" id="subtab-material" role="tabpanel">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3>Master Data Material</h3>
-                <button class="btn btn-success" id="btnAddMaterial">Tambah Material</button>
-            </div>
-            <div class="card">
-                <div class="card-body p-0">
-                    <table class="table table-striped mb-0" id="materialsTable">
-                        <thead>
-                            <tr>
-                                <th>Kode</th>
-                                <th>Nama</th>
-                                <th>Kategori</th>
-                                <th>Satuan</th>
-                                <th>Min. Stok</th>
-                                <th>Kadaluarsa?</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <!-- Sub-tab Kategori -->
-        <div class="tab-pane fade" id="subtab-category" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">Kategori Material</div>
-                <div class="card-body">
-                    <form class="mb-3" id="formCategory">
-                        <input type="hidden" id="categoryId">
-                        <div class="input-group">
-                            <input type="text" id="categoryName" class="form-control" placeholder="Nama Kategori" required>
-                            <button class="btn btn-success" type="submit" id="btnSaveCategory">Simpan</button>
+                <!-- Master Data Tab -->
+                <div class="tab-pane fade" id="master-data">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Master Data</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchMasterData">
+                            </div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaterialModal">
+                                <i class="bi bi-plus-circle"></i> Tambah Material
+                            </button>
                         </div>
-                    </form>
-                    <ul class="list-group" id="categoryList"></ul>
-                </div>
-            </div>
-        </div>
-        <!-- Sub-tab Satuan -->
-        <div class="tab-pane fade" id="subtab-unit" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">Satuan Material</div>
-                <div class="card-body">
-                    <form class="mb-3" id="formUnit">
-                        <input type="hidden" id="unitId">
-                        <div class="input-group">
-                            <input type="text" id="unitName" class="form-control" placeholder="Satuan" required>
-                            <button class="btn btn-success" type="submit" id="btnSaveUnit">Simpan</button>
-                        </div>
-                    </form>
-                    <ul class="list-group" id="unitList"></ul>
-                </div>
-            </div>
-        </div>
-        <!-- Sub-tab Lokasi -->
-        <div class="tab-pane fade" id="subtab-location" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">Lokasi Material</div>
-                <div class="card-body">
-                    <form class="mb-3" id="formLocation">
-                        <input type="hidden" id="locationId">
-                        <div class="input-group">
-                            <input type="text" id="locationName" class="form-control" placeholder="Lokasi" required>
-                            <button class="btn btn-success" type="submit" id="btnSaveLocation">Simpan</button>
-                        </div>
-                    </form>
-                    <ul class="list-group" id="locationList"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-                <!-- Permintaan Material -->
-                <div class="tab-pane fade" id="tab-request">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3>Permintaan Material</h3>
-                        <button class="btn btn-success" id="btnAddRequest">Buat Permintaan</button>
                     </div>
+                    
                     <div class="card">
-                        <div class="card-body p-0">
-                            <table class="table table-striped mb-0" id="requestTable">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th>Pelatihan</th>
-                                        <th>Status</th>
-                                        <th>Jumlah Item</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Daftar Material</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="exportMasterData">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="printMasterData">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="masterDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Kode</th>
+                                            <th>Nama Material</th>
+                                            <th>Kategori</th>
+                                            <th>Satuan</th>
+                                            <th>Min. Stok</th>
+                                            <th>Expirable</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <!-- Tab lainnya menyusul -->
+                
+                <!-- Material Request Tab -->
+                <div class="tab-pane fade" id="material-request">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Permintaan Material</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchMaterialRequest">
+                            </div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRequestModal">
+                                <i class="bi bi-plus-circle"></i> Buat Permintaan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Daftar Permintaan Material</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="exportMaterialRequest">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="printMaterialRequest">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="materialRequestTable">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Permintaan</th>
+                                            <th>Tanggal</th>
+                                            <th>Pelatihan</th>
+                                            <th>Status</th>
+                                            <th>Dibuat Oleh</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Material Receipt Tab -->
+                <div class="tab-pane fade" id="material-receipt">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Penerimaan Material</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchMaterialReceipt">
+                            </div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addReceiptModal">
+                                <i class="bi bi-plus-circle"></i> Buat Penerimaan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Daftar Penerimaan Material</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="exportMaterialReceipt">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="printMaterialReceipt">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="materialReceiptTable">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Penerimaan</th>
+                                            <th>Tanggal</th>
+                                            <th>Supplier</th>
+                                            <th>No. PO</th>
+                                            <th>Total Item</th>
+                                            <th>Lokasi</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Material Usage Tab -->
+                <div class="tab-pane fade" id="material-usage">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Pengeluaran Material</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchMaterialUsage">
+                            </div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUsageModal">
+                                <i class="bi bi-plus-circle"></i> Buat Pengeluaran
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Daftar Pengeluaran Material</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="exportMaterialUsage">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="printMaterialUsage">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="materialUsageTable">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Pengeluaran</th>
+                                            <th>Tanggal</th>
+                                            <th>Pelatihan</th>
+                                            <th>Total Item</th>
+                                            <th>Lokasi</th>
+                                            <th>Dikeluarkan Oleh</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stock Adjustment Tab -->
+                <div class="tab-pane fade" id="stock-adjustment">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Penyesuaian Stok</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchStockAdjustment">
+                            </div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdjustmentModal">
+                                <i class="bi bi-plus-circle"></i> Buat Penyesuaian
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Daftar Penyesuaian Stok</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="exportStockAdjustment">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="printStockAdjustment">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="stockAdjustmentTable">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Penyesuaian</th>
+                                            <th>Tanggal</th>
+                                            <th>Material</th>
+                                            <th>Qty Sebelum</th>
+                                            <th>Qty Sesudah</th>
+                                            <th>Alasan</th>
+                                            <th>Dilakukan Oleh</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stock Destruction Tab -->
+                <div class="tab-pane fade" id="stock-destruction">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Pemusnahan Stok</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchStockDestruction">
+                            </div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDestructionModal">
+                                <i class="bi bi-plus-circle"></i> Buat Pemusnahan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Daftar Pemusnahan Stok</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="exportStockDestruction">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="printStockDestruction">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="stockDestructionTable">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Pemusnahan</th>
+                                            <th>Tanggal</th>
+                                            <th>Material</th>
+                                            <th>Qty</th>
+                                            <th>Batch</th>
+                                            <th>Alasan</th>
+                                            <th>Dilakukan Oleh</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stock Transfer Tab -->
+                <div class="tab-pane fade" id="stock-transfer">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Transfer Stok</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchStockTransfer">
+                            </div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTransferModal">
+                                <i class="bi bi-plus-circle"></i> Buat Transfer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Daftar Transfer Stok</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="exportStockTransfer">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="printStockTransfer">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="stockTransferTable">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Transfer</th>
+                                            <th>Tanggal</th>
+                                            <th>Material</th>
+                                            <th>Qty</th>
+                                            <th>Dari Lokasi</th>
+                                            <th>Ke Lokasi</th>
+                                            <th>Dilakukan Oleh</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stock Forecast Tab -->
+                <div class="tab-pane fade" id="stock-forecast">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Forecast Stok</h2>
+                        <div class="d-flex">
+                            <div class="search-box me-2">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari..." id="searchStockForecast">
+                            </div>
+                            <button class="btn btn-primary" id="refreshForecast">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Parameter Forecast</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="forecastForm">
+                                        <div class="mb-3">
+                                            <label for="forecastMaterial" class="form-label">Material</label>
+                                            <select class="form-select" id="forecastMaterial">
+                                                <!-- Options will be loaded here -->
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="forecastPeriod" class="form-label">Periode Forecast (bulan)</label>
+                                            <input type="number" class="form-control" id="forecastPeriod" value="3" min="1" max="12">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="forecastMethod" class="form-label">Metode Forecast</label>
+                                            <select class="form-select" id="forecastMethod">
+                                                <option value="average">Rata-rata Pemakaian</option>
+                                                <option value="moving">Moving Average (3 bulan)</option>
+                                                <option value="trend">Trend Analysis</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="calculateForecast">
+                                            <i class="bi bi-calculator"></i> Hitung Forecast
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Hasil Forecast</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="forecastResult">
+                                        <p class="text-muted">Pilih material dan parameter forecast untuk melihat hasil</p>
+                                    </div>
+                                    <div class="mt-3" id="forecastChartContainer">
+                                        <canvas id="forecastChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Rekomendasi Pembelian</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="forecastRecommendationTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Material</th>
+                                                    <th>Stok Saat Ini</th>
+                                                    <th>Rata-rata Pemakaian</th>
+                                                    <th>Perkiraan Kebutuhan</th>
+                                                    <th>Min. Stok</th>
+                                                    <th>Rekomendasi Pembelian</th>
+                                                    <th>Lead Time (hari)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Data will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reports Tab -->
+                <div class="tab-pane fade" id="reports">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Laporan Inventory</h2>
+                        <div class="d-flex">
+                            <button class="btn btn-primary" id="refreshReports">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Parameter Laporan</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="reportForm">
+                                        <div class="mb-3">
+                                            <label for="reportType" class="form-label">Jenis Laporan</label>
+                                            <select class="form-select" id="reportType">
+                                                <option value="stock">Laporan Stok</option>
+                                                <option value="movement">Laporan Pergerakan Stok</option>
+                                                <option value="usage">Laporan Pemakaian Material</option>
+                                                <option value="expiry">Laporan Stok Kadaluarsa</option>
+                                                <option value="request">Laporan Permintaan Material</option>
+                                            </select>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="reportStartDate" class="form-label">Tanggal Mulai</label>
+                                                <input type="date" class="form-control" id="reportStartDate">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="reportEndDate" class="form-label">Tanggal Akhir</label>
+                                                <input type="date" class="form-control" id="reportEndDate">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3" id="reportMaterialContainer" style="display: none;">
+                                            <label for="reportMaterial" class="form-label">Material</label>
+                                            <select class="form-select" id="reportMaterial">
+                                                <!-- Options will be loaded here -->
+                                            </select>
+                                        </div>
+                                        <div class="mb-3" id="reportLocationContainer" style="display: none;">
+                                            <label for="reportLocation" class="form-label">Lokasi</label>
+                                            <select class="form-select" id="reportLocation">
+                                                <!-- Options will be loaded here -->
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="generateReport">
+                                            <i class="bi bi-file-earmark-text"></i> Generate Laporan
+                                        </button>
+                                        <button type="button" class="btn btn-success ms-2" id="exportReport">
+                                            <i class="bi bi-download"></i> Export
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Pratinjau Laporan</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="reportPreview">
+                                        <p class="text-muted">Pilih parameter laporan untuk melihat pratinjau</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Detail Laporan</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="reportDetailTable">
+                                            <thead>
+                                                <tr>
+                                                    <!-- Columns will be loaded dynamically -->
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Data will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings Tab -->
+                <div class="tab-pane fade" id="settings">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Pengaturan Sistem</h2>
+                        <button class="btn btn-primary" id="saveSettings">
+                            <i class="bi bi-save"></i> Simpan Pengaturan
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Pengaturan Umum</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="generalSettingsForm">
+                                        <div class="mb-3">
+                                            <label for="companyName" class="form-label">Nama Perusahaan</label>
+                                            <input type="text" class="form-control" id="companyName" value="Perkebunan Kelapa Sawit">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="trainingCenterName" class="form-label">Nama Training Center</label>
+                                            <input type="text" class="form-control" id="trainingCenterName" value="Training Center">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="defaultLocation" class="form-label">Lokasi Default</label>
+                                            <input type="text" class="form-control" id="defaultLocation" value="Gudang Utama">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="daysBeforeExpiryWarning" class="form-label">Peringatan Sebelum Kadaluarsa (hari)</label>
+                                            <input type="number" class="form-control" id="daysBeforeExpiryWarning" value="30">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Pengaturan Koneksi</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="connectionSettingsForm">
+                                        <div class="mb-3">
+                                            <label for="sheetId" class="form-label">Google Sheet ID</label>
+                                            <input type="text" class="form-control" id="sheetId" value="1ihnb6E27RTX3RekiTJW9ONKA33YAXUfIBCofLMBSbk4">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="apiKey" class="form-label">Google API Key</label>
+                                            <input type="text" class="form-control" id="apiKey" value="AIzaSyBf3LLK72GTjY-m4Wzh8vd0BBIujgyH5t0">
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <small>Pastikan Google Sheet sudah dibagikan dengan akses edit ke alamat email yang terkait dengan API Key.</small>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Pengaturan Nomor Dokumen</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="documentSettingsForm">
+                                        <div class="mb-3">
+                                            <label for="requestPrefix" class="form-label">Prefix Permintaan Material</label>
+                                            <input type="text" class="form-control" id="requestPrefix" value="REQ">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="receiptPrefix" class="form-label">Prefix Penerimaan Material</label>
+                                            <input type="text" class="form-control" id="receiptPrefix" value="REC">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="usagePrefix" class="form-label">Prefix Pengeluaran Material</label>
+                                            <input type="text" class="form-control" id="usagePrefix" value="USE">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="adjustmentPrefix" class="form-label">Prefix Penyesuaian Stok</label>
+                                            <input type="text" class="form-control" id="adjustmentPrefix" value="ADJ">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="destructionPrefix" class="form-label">Prefix Pemusnahan Stok</label>
+                                            <input type="text" class="form-control" id="destructionPrefix" value="DES">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="transferPrefix" class="form-label">Prefix Transfer Stok</label>
+                                            <input type="text" class="form-control" id="transferPrefix" value="TRF">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Backup & Restore</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <button class="btn btn-primary w-100" id="backupData">
+                                            <i class="bi bi-cloud-arrow-down"></i> Backup Data ke Google Sheet
+                                        </button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="restoreFile" class="form-label">Restore Data dari File</label>
+                                        <input type="file" class="form-control" id="restoreFile">
+                                    </div>
+                                    <button class="btn btn-warning w-100" id="restoreData">
+                                        <i class="bi bi-cloud-arrow-up"></i> Restore Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Material -->
-    <div class="modal fade" id="materialModal" tabindex="-1">
-        <div class="modal-dialog">
-            <form class="modal-content" id="materialForm">
+    <!-- Modals -->
+    <!-- Add Material Modal -->
+    <div class="modal fade" id="addMaterialModal" tabindex="-1" aria-labelledby="addMaterialModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="materialModalLabel">Tambah Material</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addMaterialModalLabel">Tambah Material Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="materialIdx" value="" />
-                    <div class="mb-2">
-                        <label class="form-label">Kode Material</label>
-                        <input type="text" class="form-control" id="materialCode" required />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Nama Material</label>
-                        <input type="text" class="form-control" id="materialName" required />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Kategori</label>
-                        <select class="form-select" id="materialCategory" required>
-                            <option value="">Pilih...</option>
-                            <option value="Bahan Makanan">Bahan Makanan</option>
-                            <option value="Pembersih">Pembersih</option>
-                            <option value="ATK">ATK</option>
-                            <option value="Peralatan">Peralatan</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Satuan</label>
-                        <select class="form-select" id="materialUnit" required>
-                            <option value="">Pilih...</option>
-                            <option value="Pcs">Pcs</option>
-                            <option value="Kg">Kg</option>
-                            <option value="Liter">Liter</option>
-                            <option value="Pack">Pack</option>
-                            <option value="Dus">Dus</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Min. Stok</label>
-                        <input type="number" class="form-control" id="materialMinStock" min="0" value="0" required />
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="materialIsExpirable">
-                        <label class="form-check-label">Material Memiliki Kadaluarsa</label>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Catatan</label>
-                        <textarea class="form-control" id="materialNotes" rows="2"></textarea>
-                    </div>
+                    <form id="materialForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="materialCode" class="form-label">Kode Material</label>
+                                    <input type="text" class="form-control" id="materialCode" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="materialName" class="form-label">Nama Material</label>
+                                    <input type="text" class="form-control" id="materialName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="materialCategory" class="form-label">Kategori</label>
+                                    <select class="form-select" id="materialCategory" required>
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="Bahan Makanan">Bahan Makanan</option>
+                                        <option value="Minuman">Minuman</option>
+                                        <option value="Pembersih">Pembersih</option>
+                                        <option value="Peralatan">Peralatan</option>
+                                        <option value="ATK">ATK</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="materialUnit" class="form-label">Satuan</label>
+                                    <select class="form-select" id="materialUnit" required>
+                                        <option value="">Pilih Satuan</option>
+                                        <option value="Pcs">Pcs</option>
+                                        <option value="Box">Box</option>
+                                        <option value="Kg">Kg</option>
+                                        <option value="Liter">Liter</option>
+                                        <option value="Pack">Pack</option>
+                                        <option value="Dus">Dus</option>
+                                        <option value="Botol">Botol</option>
+                                        <option value="Lembar">Lembar</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="materialMinStock" class="form-label">Minimal Stok</label>
+                                    <input type="number" class="form-control" id="materialMinStock" min="0" value="0">
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="materialIsExpirable">
+                                    <label class="form-check-label" for="materialIsExpirable">Material memiliki masa kadaluarsa</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="materialNotes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="materialNotes" rows="3"></textarea>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
-                    <button class="btn btn-primary" type="submit">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="saveMaterial">Simpan</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-    <!-- Modal Permintaan Material -->
-    <div class="modal fade" id="requestModal" tabindex="-1">
+
+    <!-- Add Request Modal -->
+    <div class="modal fade" id="addRequestModal" tabindex="-1" aria-labelledby="addRequestModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <form class="modal-content" id="requestForm">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Buat Permintaan Material</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addRequestModalLabel">Buat Permintaan Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="requestIdx" value="" />
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <label class="form-label">Tanggal Permintaan</label>
-                            <input type="date" class="form-control" id="requestDate" required>
+                    <form id="requestForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="requestNumber" class="form-label">Nomor Permintaan</label>
+                                <input type="text" class="form-control" id="requestNumber" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="requestDate" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="requestDate" required>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Pelatihan</label>
+                        <div class="mb-3">
+                            <label for="requestTraining" class="form-label">Untuk Pelatihan</label>
                             <input type="text" class="form-control" id="requestTraining" required>
                         </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Catatan</label>
-                        <textarea class="form-control" id="requestNotes" rows="2"></textarea>
-                    </div>
-                    <hr>
-                    <h6>Daftar Item Material</h6>
-                    <button class="btn btn-outline-primary mb-2" type="button" id="btnAddRequestItem">Tambah
-                        Item</button>
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="requestItemsTable">
-                            <thead>
-                                <tr>
-                                    <th>Material</th>
-                                    <th>Qty</th>
-                                    <th>Satuan</th>
-                                    <th>Kebutuhan</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                        <div class="mb-3">
+                            <label for="requestNotes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="requestNotes" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Daftar Material</h6>
+                                <button type="button" class="btn btn-sm btn-primary" id="addRequestItem">
+                                    <i class="bi bi-plus"></i> Tambah Item
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="requestItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Material</th>
+                                                <th>Qty</th>
+                                                <th>Satuan</th>
+                                                <th>Kebutuhan</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
-                    <button class="btn btn-primary" type="submit">Simpan Permintaan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitRequest">Simpan Permintaan</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/materials.js"></script>
-    <script src="js/api.js"></script>
-</body>
+    <!-- Add Receipt Modal -->
+    <div class="modal fade" id="addReceiptModal" tabindex="-1" aria-labelledby="addReceiptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addReceiptModalLabel">Buat Penerimaan Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="receiptForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="receiptNumber" class="form-label">Nomor Penerimaan</label>
+                                <input type="text" class="form-control" id="receiptNumber" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="receiptDate" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="receiptDate" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="receiptSupplier" class="form-label">Supplier</label>
+                                <input type="text" class="form-control" id="receiptSupplier">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="receiptPONumber" class="form-label">Nomor PO</label>
+                                <input type="text" class="form-control" id="receiptPONumber">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="receiptLocation" class="form-label">Lokasi Penyimpanan</label>
+                            <input type="text" class="form-control" id="receiptLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="receiptNotes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="receiptNotes" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Daftar Material</h6>
+                                <button type="button" class="btn btn-sm btn-primary" id="addReceiptItem">
+                                    <i class="bi bi-plus"></i> Tambah Item
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="receiptItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Material</th>
+                                                <th>Batch</th>
+                                                <th>Qty</th>
+                                                <th>Satuan</th>
+                                                <th>Expired Date</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitReceipt">Simpan Penerimaan</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Add Usage Modal -->
+    <div class="modal fade" id="addUsageModal" tabindex="-1" aria-labelledby="addUsageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUsageModalLabel">Buat Pengeluaran Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="usageForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="usageNumber" class="form-label">Nomor Pengeluaran</label>
+                                <input type="text" class="form-control" id="usageNumber" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="usageDate" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="usageDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="usageTraining" class="form-label">Untuk Pelatihan</label>
+                            <input type="text" class="form-control" id="usageTraining" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="usageLocation" class="form-label">Lokasi Pengambilan</label>
+                            <input type="text" class="form-control" id="usageLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="usageNotes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="usageNotes" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Daftar Material</h6>
+                                <button type="button" class="btn btn-sm btn-primary" id="addUsageItem">
+                                    <i class="bi bi-plus"></i> Tambah Item
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="usageItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Material</th>
+                                                <th>Batch</th>
+                                                <th>Qty Tersedia</th>
+                                                <th>Qty Keluar</th>
+                                                <th>Satuan</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitUsage">Simpan Pengeluaran</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Adjustment Modal -->
+    <div class="modal fade" id="addAdjustmentModal" tabindex="-1" aria-labelledby="addAdjustmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAdjustmentModalLabel">Buat Penyesuaian Stok</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adjustmentForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="adjustmentNumber" class="form-label">Nomor Penyesuaian</label>
+                                <input type="text" class="form-control" id="adjustmentNumber" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="adjustmentDate" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="adjustmentDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustmentLocation" class="form-label">Lokasi</label>
+                            <input type="text" class="form-control" id="adjustmentLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustmentReason" class="form-label">Alasan Penyesuaian</label>
+                            <select class="form-select" id="adjustmentReason" required>
+                                <option value="">Pilih Alasan</option>
+                                <option value="Stock Opname">Stock Opname</option>
+                                <option value="Kerusakan">Kerusakan</option>
+                                <option value="Hilang">Hilang</option>
+                                <option value="Perhitungan Ulang">Perhitungan Ulang</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustmentNotes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="adjustmentNotes" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Daftar Penyesuaian</h6>
+                                <button type="button" class="btn btn-sm btn-primary" id="addAdjustmentItem">
+                                    <i class="bi bi-plus"></i> Tambah Item
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="adjustmentItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Material</th>
+                                                <th>Batch</th>
+                                                <th>Qty Sistem</th>
+                                                <th>Qty Fisik</th>
+                                                <th>Selisih</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitAdjustment">Simpan Penyesuaian</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Destruction Modal -->
+    <div class="modal fade" id="addDestructionModal" tabindex="-1" aria-labelledby="addDestructionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDestructionModalLabel">Buat Pemusnahan Stok</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="destructionForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="destructionNumber" class="form-label">Nomor Pemusnahan</label>
+                                <input type="text" class="form-control" id="destructionNumber" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="destructionDate" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="destructionDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="destructionLocation" class="form-label">Lokasi</label>
+                            <input type="text" class="form-control" id="destructionLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="destructionReason" class="form-label">Alasan Pemusnahan</label>
+                            <select class="form-select" id="destructionReason" required>
+                                <option value="">Pilih Alasan</option>
+                                <option value="Kadaluarsa">Kadaluarsa</option>
+                                <option value="Rusak">Rusak</option>
+                                <option value="Tidak Memenuhi Standar">Tidak Memenuhi Standar</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="destructionMethod" class="form-label">Metode Pemusnahan</label>
+                            <input type="text" class="form-control" id="destructionMethod" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="destructionNotes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="destructionNotes" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Daftar Pemusnahan</h6>
+                                <button type="button" class="btn btn-sm btn-primary" id="addDestructionItem">
+                                    <i class="bi bi-plus"></i> Tambah Item
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="destructionItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Material</th>
+                                                <th>Batch</th>
+                                                <th>Qty Tersedia</th>
+                                                <th>Qty Dimusnahkan</th>
+                                                <th>Satuan</th>
+                                                <th>Expired Date</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitDestruction">Simpan Pemusnahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Transfer Modal -->
+    <div class="modal fade" id="addTransferModal" tabindex="-1" aria-labelledby="addTransferModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTransferModalLabel">Buat Transfer Stok</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transferForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="transferNumber" class="form-label">Nomor Transfer</label>
+                                <input type="text" class="form-control" id="transferNumber" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="transferDate" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="transferDate" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="transferFrom" class="form-label">Dari Lokasi</label>
+                                <input type="text" class="form-control" id="transferFrom" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="transferTo" class="form-label">Ke Lokasi</label>
+                                <input type="text" class="form-control" id="transferTo" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transferNotes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="transferNotes" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Daftar Transfer</h6>
+                                <button type="button" class="btn btn-sm btn-primary" id="addTransferItem">
+                                    <i class="bi bi-plus"></i> Tambah Item
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="transferItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Material</th>
+                                                <th>Batch</th>
+                                                <th>Qty Tersedia</th>
+                                                <th>Qty Transfer</th>
+                                                <th>Satuan</th>
+                                                <th>Expired Date</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitTransfer">Simpan Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Detail Modal -->
+    <div class="modal fade" id="viewDetailModal" tabindex="-1" aria-labelledby="viewDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewDetailModalLabel">Detail Dokumen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailModalContent">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" id="printDetail">Cetak</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="js/ui.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/materials.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/units.js"></script>
+    <script src="js/locations.js"></script>
+    <script src="js/requests.js"></script>
+    <script src="js/receipts.js"></script>
+    <script src="js/usages.js"></script>
+    <script src="js/adjustments.js"></script>
+</body>
 </html>

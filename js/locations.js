@@ -1,58 +1,75 @@
-// CRUD Lokasi
+// js/locations.js
+
+let locations = [];
+
 async function loadLocations() {
-  try {
-    const data = await window.getLocations();
+    locations = await getLocations();
+    renderLocations();
+}
+
+function renderLocations() {
     const list = document.getElementById('locationList');
+    if (!list) return;
     list.innerHTML = '';
-    data.forEach(loc => {
-      const li = document.createElement('li');
-      li.className = 'list-group-item d-flex justify-content-between align-items-center';
-      li.innerHTML = `
-        <span>${loc.name}</span>
-        <div>
-          <button class="btn btn-sm btn-warning me-1" onclick="editLocationForm('${loc.id}','${loc.name}')">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteLocationAct('${loc.id}')">Hapus</button>
-        </div>
-      `;
-      list.appendChild(li);
+    locations.forEach(loc => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML = `
+            <span>${loc.name}</span>
+            <div>
+                <button class="btn btn-sm btn-warning me-1" onclick="editLocationForm('${loc.id}','${loc.name}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteLocationAct('${loc.id}')">Hapus</button>
+            </div>
+        `;
+        list.appendChild(li);
     });
-    // update dropdown lokasi pada material, jika ada
-    const dd = document.getElementById('materialLocation');
-    if(dd) {
-      dd.innerHTML = '<option value="">Pilih...</option>' + data.map(c=>`<option>${c.name}</option>`).join('');
-    }
-  } catch (e) {
-    alert("Gagal memuat data lokasi. Periksa koneksi internet/API.");
-  }
 }
 
 window.editLocationForm = function(id, name) {
-  document.getElementById('locationId').value = id;
-  document.getElementById('locationName').value = name;
+    const idEl = document.getElementById('locationId');
+    const nameEl = document.getElementById('locationName');
+    if (idEl && nameEl) {
+        idEl.value = id;
+        nameEl.value = name;
+    }
 }
 
 window.deleteLocationAct = async function(id) {
-  if (confirm('Hapus lokasi ini?')) {
-    await window.deleteLocation(id);
-    loadLocations();
-  }
+    if (confirm('Hapus lokasi ini?')) {
+        await deleteLocation(id);
+        if (document.getElementById('locationList')) {
+            loadLocations();
+        }
+    }
 }
 
-document.getElementById('formLocation').onsubmit = async function(e) {
-  e.preventDefault();
-  const id = document.getElementById('locationId').value;
-  const name = document.getElementById('locationName').value.trim();
-  if (!name) {
-    alert("Nama lokasi harus diisi!");
-    return;
-  }
-  if (id) {
-    await window.editLocation({id, name});
-  } else {
-    await window.addLocation({name});
-  }
-  this.reset();
-  loadLocations();
+const formLocation = document.getElementById('formLocation');
+if (formLocation) {
+    formLocation.onsubmit = async function(e) {
+        e.preventDefault();
+        const idEl = document.getElementById('locationId');
+        const nameEl = document.getElementById('locationName');
+        const id = idEl ? idEl.value : '';
+        const name = nameEl ? nameEl.value.trim() : '';
+        if (!name) {
+            showAlert('Nama lokasi wajib diisi!', 'danger');
+            return;
+        }
+        if (id) {
+            await editLocation({ id, name });
+        } else {
+            await addLocation({ name });
+        }
+        this.reset();
+        if (document.getElementById('locationList')) {
+            loadLocations();
+        }
+    }
 }
 
-document.addEventListener('DOMContentLoaded', loadLocations);
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('locationList')) {
+        loadLocations();
+    }
+});
